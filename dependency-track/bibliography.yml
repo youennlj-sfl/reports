@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mkdjr/hayagriva/refs/heads/main/hayagriva.schema.json
+
+vulnscout:
+  type: repository
+  title: VulnScout
+  organization: Savoir-Faire Linux
+  url:
+    value: https://github.com/savoirfairelinux/vulnscout/
+    date: 2026-03-11
+
+dependencytrack:
+  type: web
+  title: Dependency-Track
+  organization: The OWASP Foundation
+  url:
+    value: https://dependencytrack.org/
+    date: 2026-04-22
+
+meta-cyclonedx:
+  type: repository
+  title: meta-cyclonedx
+  organization: iris-GmbH
+  url:
+    value: https://github.com/iris-GmbH/meta-cyclonedx
+    date: 2026-04-22
+
+github-actions:
+  type: book
+  title: 'Hands-on GitHub Actions: Implement CI/CD with GitHub Action Workflows for Your Applications'
+  publisher:
+    name: Apress
+    location: Berkeley, CA
+  author:
+  - Chandrasekara, Chaminda
+  - Herath, Pushpa
+  date: 2021
+  page-total: 162
+  url: https://doi.org/10.1007/978-1-4842-6464-5_1
+  serial-number:
+    doi: 10.1007/978-1-4842-6464-5
+    isbn: 978-1-4842-6464-5
+  abstract: GitHub is the most widely embraced repository platform for software developers and open source communities. Large enterprises and individual developers use the GitHub platform to keep versioned source code. GitHub can be integrated with Azure Pipelines and other CI/CD (continuous integration and continuous deployment) tools to provide software delivery automation. Instead of using third-party integrations for GitHub repositories, you can now use GitHub Actions as workflows to implement CI/CD pipelines.
+
+meta-vulnscout:
+  type: repository
+  title: meta-vulnscout
+  organization: Savoir-Faire Linux
+  url:
+    value: https://github.com/savoirfairelinux/meta-vulnscout/
+    date: 2026-03-11
+
+yoctoproject:
+  type: reference
+  title: Yocto Project Documentation
+  author: The Yocto Project®
+  url:
+    value: "https://docs.yoctoproject.org/"
+    date: 2026-04-21
