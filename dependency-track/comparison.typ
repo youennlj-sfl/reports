@@ -30,28 +30,31 @@ notes:
 
 #import "@preview/subpar:0.2.2"
 
+// Styling:
 #show raw.where(block: false): box.with(fill: luma(90%), outset: (x: .15em, y: .25em), radius: 2pt)
 #show raw.where(block: true): set block(fill: luma(95%), inset: .5em, radius: 4pt)
 #show ref: underline
 
+#set page(numbering: "1/1", header: text(fill: luma(50%))[Savoir-faire Linux #h(1fr) Youenn Le Jeune])
+#set heading(numbering: "1.")
+#set par(justify: true, first-line-indent: 1em)
+
+// Aliases for conciseness:
 #let VS = "VulnScout"
 #let DT = "Dependency-Track"
 
 #set document(author: "Youenn Le Jeune", title: [Yocto vulnerability assessment:\ #VS or #DT?])
-#set page(numbering: "1/1", header: text(fill: luma(50%))[Savoir-faire Linux #h(1fr) Youenn Le Jeune])
-
-#set heading(numbering: "1.")
 
 #align(center, title())
 
 Yocto-based projects are huge software projects that have huge dependency trees and that can have hundreds or thousands of vulnerabilities. Assessing them is crucial (and soon to be mandatory in Europe#footnote(link("https://digital-strategy.ec.europa.eu/en/policies/cyber-resilience-act"))). There are several software solutions available for vulnerability assessment and this paper will compare 2 of them: #VS@vulnscout developed by Savoir-Faire Linux and #DT@dependencytrack developed by the OWASP Foundation. The comparison will especially focus on differences that matter for Yocto@yoctoproject based projects.
 
-= Out-of-box experience
-Launching #VS is quite easy: clone the repository, run `./vulnscout --serve`, wait a few seconds for the server to start and you're good to go: import your input files, run a Grype scan, do your assessment...
+= Design philosophies
+Both tools have a fundamental design difference: #DT is made to be deployed on a server in a company's infrastructure and is to be used by multiple people. It can be deployed once and centralize all projects of the company in a single place. #VS is very different: it is made to be ran on the user's machine only for the duration of its use and to be stopped afterwards.
 
-Launching #DT on the other hand is quite a process. If you want to run it locally in the same way as #VS, you'll have to download a docker compose file, run it, wait dozens of minutes for the databases to be mirrored (when testing it to write this report, it took a whole 1h30m). Then you'll have to set-up administrative credentials, and finally you'll be able to see the dashboard and start actually working.
+This design difference is obvious when you look at the out-of-box experience: to launch #VS, all you have to do is clone the repository, run `./vulnscout --serve` and wait a few seconds. To start #DT, you have to download a Docker Compose file, run it then wait dozens of minutes for the databases to be mirrored (when testing it to write this report, it took a whole 1h30m). Then you'll have to set-up administrative credentials, and finally you'll be able to access the application.
 
-In an company environment where you deploy #DT once and it is used by everyone, this is perfectly fine. However, for open-source projects, you cannot expect all of your team members, external contributors and end users to do this whole set-up in order to verify the CVE assessments. This is one of the most fundamental differences between #VS and #DT.
+This difference alone can already contribute to the choice of assessment tool: for instance, when you only have to do assessments once every few months for a few small to medium projects, it might not be worth it to deploy a #DT instance. #VS can perfectly handle that. Another example would be an open-source project: if you want your external contributors or end users to be able to completely reproduce the build workflow, from the source fetch to the vulnerability assessment on the build artifacts, you'll have to either give access to your #DT instance (which might not be possible) or require external users to install it themselves (which is cumbersome as we saw earlier). #VS is better suited for this. Now, if you handle several big, closed source projects and you need to constantly keep a global view on the vulnerabilities, it might be better to deploy #DT at your company and centralize your projects there.
 
 
 = Features comparison
@@ -139,12 +142,15 @@ In contrast, in #DT the feature is fully integrated in the app: there is a "poli
   caption: [Example of a simple CI workflow for #VS],
 ) <fig:vs:ci-workflow>
 
-#DT cannot be used in the same way since it requires its database mirror to be populated, which takes a long time. For it to be used in CI, the workflow must reference a deployed instance of #DT and use the REST API to upload SBOMs, start analysis, get vulnerabilities that violate policies... This means managing access tokens, writing curl commands, handling the data it receives, etc. It is less easy to write and also impossible for external contributors and end users to replicate, which is a shame for an open-source project.
+#DT cannot be used in the same way since it requires its database mirror to be populated, which takes a long time. For it to be used in CI, the workflow must reference a deployed instance of #DT and use the REST API to interact with it, which means managing authentication via access tokens. Then, to do the actual interaction, there are several possibilities:
+- use the official Jenkins plugin which does a really great job (uploads BOMs, displays vulnerabilities, reports policy violations...);
+- use the official GitHub Action which is not actively maintainted and only handles uploading BOMs;
+- use third-party GitHub Actions which do more things... but are maintained by third parties, which is a security risk;
+- making raw HTTP requests and handle the data received, which is more complex to write.
 
 == Integration with Yocto
 As already stated in @section:sbom, #DT cannot directly work on the output of a Yocto build, you need a separate layer to create CycloneDX files. On the contrary, #VS directly supports the files created by Yocto so they can be uploaded via the frontend or the CLI. But in order to ease even more integration with Yocto, Savoir-Faire Linux developed a custom `meta-vulnscout` layer@meta-vulnscout that includes all of the necessary scripts and classes to produce the best CVE check possible (for example by filtering kernel CVEs) and even a custom task to directly start #VS from inside Bitbake.
 
-#pagebreak()
 = Conclusion
 Both tools serve fundamentally different purposes. #DT is made to be deployed once in a centralized location (e.g. on a server in the company's internal network) and then accessed by everyone from there. It centralizes SBOMs, licenses, vulnerabilities and so on for every project of the company. It also has a really powerful "policies" feature that makes tracking important vulnerabilities easy.
 
