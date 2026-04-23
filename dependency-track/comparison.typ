@@ -72,7 +72,15 @@ This difference alone can already contribute to the choice of assessment tool: f
 On the contrary, #VS support a lot of SBOM formats: SPDX2 (both individual JSON files and archive files produced by Yocto Scarthgap), SPDX3, CycloneDX, OpenVEX, output of Grype scans, output of Yocto's `cve-check` class. Basically, #VS can be directly wired to the output of a Yocto build without complicated manipulations.
 
 == Reports
-#VS has an interesting feature: you can pass it Jinja templates (named "reports") and it will _render_ them using an internal set of variables spanning vulnerabilities, projects, packages and so on. It is really interesting in order to produce an artifact than can be attached to builds and given to end users so they are informed about the packaged software and the detected vulnerabilities in full transparency. It looks like #DT does not have such a feature.
+#VS has an interesting feature: you can pass it Jinja templates (named "reports") and it will _render_ them using an internal set of variables spanning vulnerabilities, projects, packages and so on. It is really interesting in order to produce an artifact than can be attached to builds and given to end users so they are informed about the packaged software and the detected vulnerabilities in full transparency. Those reports can be exported in textual formats or rendered in PDF or HTML files from AsciiDoc files (see @fig:vs:export-reports). It looks like #DT does not have such a feature.
+
+#figure(
+  image("assets/vs-export-reports.png"),
+  caption: [#VS "export" tab],
+) <fig:vs:export-reports>
+
+== Assessments
+time estimates
 
 == Policies
 Both tools have a way for users to setup a condition when vulnerabilities are "too important" and should ring a bell.
