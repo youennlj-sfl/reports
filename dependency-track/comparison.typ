@@ -121,6 +121,18 @@ In contrast, in #DT the feature is fully integrated in the app: there is a "poli
   caption: [Various #DT views where policy violations appear],
 ) <fig:dt:violations>
 
+== Exploit Prediction
+In order to predict if an exploit can happen and how important it can be, one has to look at both scores:
+- CVSS#footnote(link("https://www.first.org/cvss/")) (Common Vulnerability Scoring System): a score of how severe a vulnerability
+- EPSS#footnote(link("https://www.first.org/epss/")) (Exploit Prediction Scoring System): a score of how likely a vulnerability can be exploited
+Looking at the combination of both allows to gauge which vulnerabilities should be taken care of more importantly. #DT has a really useful visualization for this: a two-dimension chart that plots every vulnerability by their CVSS and EPSS (see @fig:dt:exploit-prediction). The most important vulnerabilities can be directly seen at the top right. For now, #VS does not have such a visualization, but one can sort the vulnerabilities list by either EPSS or CVSS and find the most important ones at the top.
+
+#figure(
+  image("assets/dt-exploit-prediction.png"),
+  caption: [#DT "Exploit Predictions" tab],
+  placement: auto,
+) <fig:dt:exploit-prediction>
+
 == Integration with CIs <section:ci>
 #VS is really easy to integrate in a CI thanks to its complete CLI.#footnote(link("https://vulnscout.readthedocs.io/en/latest/vulnscout-script.html#non-interactive-mode-ci-automation")) Since #VS is basically a container that can be spinned up in a few seconds, it can be soundly started directly in the CI environment without needing a particular cache. This makes it good to use in public CIs such as GitHub Actions @github-actions. You can find in @fig:vs:ci-workflow a simple workflow that loads SPDX and Yocto cve-check files, generates reports and fails if some CVEs matched the fail condition.
 
