@@ -71,7 +71,7 @@ This difference alone can already contribute to the choice of assessment tool: f
 
 On the contrary, #VS support a lot of SBOM formats: SPDX2 (both individual JSON files and archive files produced by Yocto Scarthgap), SPDX3, CycloneDX, OpenVEX, output of Grype scans, output of Yocto's `cve-check` class. Basically, #VS can be directly wired to the output of a Yocto build without complicated manipulations.
 
-== Reports
+== Reports <section:reports>
 #VS has an interesting feature: you can pass it Jinja templates (named "reports") and it will _render_ them using an internal set of variables spanning vulnerabilities, projects, packages and so on. It is really interesting in order to produce an artifact than can be attached to builds and given to end users so they are informed about the packaged software and the detected vulnerabilities in full transparency. Those reports can be exported in textual formats or rendered in PDF or HTML files from AsciiDoc files (see @fig:vs:export-reports). It looks like #DT does not have such a feature.
 
 #figure(
@@ -79,9 +79,73 @@ On the contrary, #VS support a lot of SBOM formats: SPDX2 (both individual JSON 
   caption: [#VS "export" tab],
 ) <fig:vs:export-reports>
 
-== Assessments
-time estimates
+== Variants and Versions <section:variants>
+#VS and #DT have the same feature but named differently, respectively "Variants" and "Versions". These essentially allow users to upload different SBOMs to the same project and have different vulnerabilities assessments. This is useful for example when working on Yocto-based projects that have different versions (machine-distribution-image couples).
 
+In practice however they are not treated in the same way. In #DT, having the same vulnerability in 2 different versions essentially means having 2 vulnerabilities: it is counted twice in every vulnerabilities counter. Thus, if you add a new version of your package with only a few packages more, your vulnerabilities count will basically double. The only place where the vulnerabilities are actually grouped by project is in the "grouped vulnerabilities" tab (see @fig:dt:grouped-vulns) which unfortunately contains the vulnerabilities of all projects without means to filter them.
+
+#figure(
+  image("assets/dt-grouped-vulns.png", width: 70%),
+  caption: [#DT "Grouped Vulnerabilities" tab of the "Vulnerability Audit" page],
+  placement: bottom,
+) <fig:dt:grouped-vulns>
+
+On the other hand, if #VS sees the same vulnerability in 2 variants of the same project, it will only count it once in the dashboard graphs. If users want to get counts for only one variant, they can select it in the variants picker (see @fig:vs:variants-picker). Furthermore, in the "vulnerabilities" page, the variants it applies too appear in a column (see @fig:vs:grouped-vulns). Unlike in #DT, it directly shows the variant names instead of only a number.
+
+
+#subpar.grid(
+  figure(
+    image("assets/vs-variants.png", width: 80%),
+    caption: [Dashboard graphs with variants picker],
+  ),
+  <fig:vs:variants-picker>,
+  figure(
+    image("assets/vs-grouped-vulns.png"),
+    caption: [Vulnerabilities tab with multiple variants],
+  ),
+  <fig:vs:grouped-vulns>,
+  gap: 1em,
+  placement: auto,
+  caption: [Variants in #VS],
+)
+
+#pagebreak()
+== Assessments
+The workflow for assessing vulnerabilities are roughly the same in both tools: select a vulnerability, check its details, select a status (exploitable, false positive, etc.), add some details depending on the status you selected (why is not applicable?) then optionally add a comment on your assessment (see @fig:dt:assessment and @fig:vs:assessment). The assessment trail from #VS (@fig:vs:assessment-trail) is more pleasant to work with on vulnerabilities that require lot of work: #DT's audit trail is text-only and is a bit rough since it contains every single change ungrouped.
+
+#subpar.grid(
+  grid.cell(colspan: 2)[#figure(
+    image("assets/dt-assessment.png"),
+    caption: [Assessing a vulnerability in #DT],
+  ) <fig:dt:assessment>],
+  figure(
+    image("assets/vs-assessment.png", width: 100%),
+    caption: [Assessing a vulnerability in #VS],
+  ),
+  <fig:vs:assessment>,
+  figure(
+    image("assets/vs-assessment-trail.png", width: 100%),
+    caption: [Assessment trail in #VS],
+  ),
+  <fig:vs:assessment-trail>,
+  columns: (2.1fr, 1fr),
+  gap: 1em,
+  placement: none,
+  caption: [Vulnerability assessment screens in both tools],
+)
+
+One can see in @fig:vs:assessment that #VS has a "time estimates" feature that can be quite interesting to gauge the time to spend in order to triage vulnerabilities. Those tracked times can then be exported in CSV thanks to the previously mentioned "Reports" feature (@section:reports).
+
+The variants feature mentioned in @section:variants is also present in #VS's assessment page: when assessing a vulnerability, the user can select to which variant the assessment applies using the checkboxes (see @fig:vs:assessment). In #DT this is not possible, users have to completely duplicate the assessment in all versions.
+
+Another similar advantage of #VS is the ability to bulk assess vulnerabilities: while in #DT you'd have to go on every single vulnerability and write the same thing over and over, in #VS you can simply select all the vulnerabilities you want and do your assessment from there (see @fig:vs:assessment-bulk).
+
+#figure(
+  image("assets/vs-assessment-bulk.png"),
+  caption: [#VS bulk assessment dialog],
+) <fig:vs:assessment-bulk>
+
+#pagebreak()
 == Policies
 Both tools have a way for users to setup a condition when vulnerabilities are "too important" and should ring a bell.
 
@@ -98,6 +162,7 @@ In #VS, the feature is meant to be used in a CI environment and is really simple
   # Report written: /scan/outputs/match_condition.adoc
   ```,
   caption: [A #VS execution with a match condition and a report],
+  placement: none,
 ) <fig:vs:match-condition>
 
 In contrast, in #DT the feature is fully integrated in the app: there is a "policy management" tab that allows users to define any number of policies with names, "violation states" (info, warn or fail) and conditions. The conditions cannot be as complex as in #VS: you only input a list of criterion that are AND-ed (see @fig:dt:policies). However, where this feature truly shines is how integrated it is with the rest of the app: there are graphs showing the amount of vulnerabilities violating the policies (@fig:dt:violations:dashboard and @fig:dt:violations:project-list) and lists showing only them for easy assessment (@fig:dt:violations:project). #DT policies are however not as easy to integrate in CI/CD pipelines since it would need communicating via the REST API to get a list of violations and handle the results ourselves, which is more complex than getting a failure exit code (more on than in @section:ci).
@@ -105,7 +170,7 @@ In contrast, in #DT the feature is fully integrated in the app: there is a "poli
 #figure(
   image("assets/dt-policies.png"),
   caption: [#DT "Policy Management" tab with two policies already set-up],
-  placement: auto,
+  placement: none,
 ) <fig:dt:policies>
 
 #subpar.grid(
@@ -127,8 +192,9 @@ In contrast, in #DT the feature is fully integrated in the app: there is a "poli
   gap: 1em,
   placement: auto,
   caption: [Various #DT views where policy violations appear],
-) <fig:dt:violations>
+)
 
+#pagebreak()
 == Exploit Prediction
 In order to predict if an exploit can happen and how important it can be, one has to look at both scores:
 - CVSS#footnote(link("https://www.first.org/cvss/")) (Common Vulnerability Scoring System): a score of how severe a vulnerability
@@ -138,7 +204,7 @@ Looking at the combination of both allows to gauge which vulnerabilities should 
 #figure(
   image("assets/dt-exploit-prediction.png"),
   caption: [#DT "Exploit Predictions" tab],
-  placement: auto,
+  placement: none,
 ) <fig:dt:exploit-prediction>
 
 == Integration with CIs <section:ci>
@@ -169,13 +235,14 @@ Looking at the combination of both allows to gauge which vulnerabilities should 
 - making raw HTTP requests and handle the data received, which is more complex to write.
 
 == Integration with Yocto
-As already stated in @section:sbom, #DT cannot directly work on the output of a Yocto build, you need a separate layer to create CycloneDX files. On the contrary, #VS directly supports the files created by Yocto so they can be uploaded via the frontend or the CLI. But in order to ease even more integration with Yocto, Savoir-Faire Linux developed a custom `meta-vulnscout` layer@meta-vulnscout that includes all of the necessary scripts and classes to produce the best CVE check possible (for example by filtering kernel CVEs) and even a custom task to directly start #VS from inside Bitbake.
+As already stated in @section:sbom, #DT cannot directly work on the output of a Yocto build, you need a separate layer to create CycloneDX files. On the contrary, #VS directly supports the files created by Yocto so they can be uploaded via the frontend or the CLI. But in order to ease even more integration with Yocto, Savoir-Faire Linux developed a custom `meta-vulnscout` layer@meta-vulnscout that includes all of the necessary scripts and classes to produce the best CVE check possible (for example by filtering kernel CVEs) and even a custom task to directly start #VS from inside Bitbake. This layer automatically sets up variants (see @section:variants) based on the selected image/machine/distribution for easy integration.
 
+#pagebreak()
 = Conclusion
 Both tools serve fundamentally different purposes. #DT is made to be deployed once in a centralized location (e.g. on a server in the company's internal network) and then accessed by everyone from there. It centralizes SBOMs, licenses, vulnerabilities and so on for every project of the company. It also has a really powerful "policies" feature that makes tracking important vulnerabilities easy.
 
 On the other hand, #VS is more self-contained: users that want to see or assess vulnerabilities simply spin it up on their machine, load the SBOMs and previous assessment files and go on from there. It offers no mean of centralization, the goal is to be able to quickly get a working environment to assess vulnerabilities. This flexibility makes it easily usable in CI/CDs.
 
-#VS truly shines for open-source and/or Yocto-based projects: its self-contained nature makes it easy for contributors and users to reproduce assessments, and its wide range of supported input formats contain the default output formats of native Yocto classes, making integration practically painless. Users wanting to use #VS directly in the Bitbake environment can even use the `meta-vulnscout` layer which eases out the setup to a breeze.
+#VS truly shines for open-source and/or Yocto-based projects: its self-contained nature makes it easy for contributors and users to reproduce assessments, and its wide range of supported input formats contain the default output formats of native Yocto classes, making integration practically painless. Users wanting to use #VS directly in the Bitbake environment can even use the `meta-vulnscout` layer which eases out the setup to a breeze. Its tightly integrated variants feature makes assessing multiple different Yocto builds easier than #DT.
 
 #bibliography("bibliography.yml")

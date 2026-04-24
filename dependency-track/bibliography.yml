@@ -1,12 +1,18 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/mkdjr/hayagriva/refs/heads/main/hayagriva.schema.json
 
 vulnscout:
-  type: repository
-  title: VulnScout
-  organization: Savoir-Faire Linux
+  type: post
+  title: "VulnScout: The Easy-to-Use Tool for Securing Embedded Systems and Staying Compliant"
+  date: 2025-10-01
+  parent:
+    type: blog
+    title: Savoir-faire Linux
+    url:
+      value: https://savoirfairelinux.com
+      date: 2026-04-23
   url:
-    value: https://github.com/savoirfairelinux/vulnscout/
-    date: 2026-03-11
+    value: https://blog.savoirfairelinux.com/en-ca/2025/vulnscout-the-easy-to-use-tool-for-securing-embedded-systems-and-staying-compliant/
+    date: 2026-04-23
 
 dependencytrack:
   type: web
